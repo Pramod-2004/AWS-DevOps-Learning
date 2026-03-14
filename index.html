@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>AWS DevOps Learning OS</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+body{
+margin:0;
+font-family:Inter,system-ui;
+background:linear-gradient(135deg,#020617,#0f172a);
+color:white;
+}
+
+.sidebar{
+position:fixed;
+width:230px;
+height:100%;
+background:#0f172a;
+padding:25px;
+}
+
+.sidebar h2{color:#38bdf8}
+
+.main{
+margin-left:260px;
+padding:40px;
+}
+
+.card{
+background:#1e293b;
+padding:20px;
+border-radius:12px;
+margin-bottom:20px;
+width:220px;
+display:inline-block;
+margin-right:15px;
+}
+
+.section{
+margin-top:40px;
+}
+
+.module{
+background:#1e293b;
+padding:15px;
+border-radius:10px;
+margin-bottom:20px;
+}
+
+.topic{
+margin:6px 0;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="sidebar">
+
+<h2>DevOps OS</h2>
+
+<p>Dashboard</p>
+<p>Curriculum</p>
+<p>Analytics</p>
+
+</div>
+
+
+<div class="main">
+
+<h1>AWS + DevOps Learning Dashboard</h1>
+
+<div>
+
+<div class="card">
+<h3>Total Topics</h3>
+<p id="total"></p>
+</div>
+
+<div class="card">
+<h3>Completed</h3>
+<p id="completed"></p>
+</div>
+
+<div class="card">
+<h3>Completion %</h3>
+<p id="percent"></p>
+</div>
+
+</div>
+
+
+<div class="section">
+
+<h2>Curriculum</h2>
+
+<div id="curriculum"></div>
+
+</div>
+
+
+<div class="section">
+
+<h2>Skill Radar</h2>
+
+<canvas id="radar"></canvas>
+
+</div>
+
+</div>
+
+<script>
+
+
+const curriculum = {
+
+"AWS Cloud Concepts":[
+"What is Cloud Computing",
+"IaaS PaaS SaaS",
+"AWS Cloud Benefits",
+"AWS Global Infrastructure",
+"Regions",
+"Availability Zones",
+"Edge Locations",
+"High Availability",
+"Fault Tolerance",
+"Elasticity",
+"Shared Responsibility Model",
+"Security of Cloud vs In Cloud"
+],
+
+"AWS Pricing":[
+"On Demand Instances",
+"Reserved Instances",
+"Spot Instances",
+"AWS Free Tier",
+"Savings Plans",
+"AWS Pricing Calculator",
+"Cost Explorer",
+"AWS Budgets",
+"TCO Calculator",
+"AWS Support Plans"
+],
+
+"AWS Security":[
+"IAM",
+"MFA",
+"AWS Organizations",
+"Service Control Policies",
+"AWS WAF",
+"AWS Shield",
+"AWS GuardDuty",
+"KMS Encryption",
+"Secrets Manager",
+"Security Hub",
+"AWS Inspector"
+],
+
+"AWS Networking":[
+"Amazon VPC",
+"Subnets",
+"Security Groups",
+"NACL",
+"VPN",
+"AWS Direct Connect",
+"PrivateLink",
+"Firewall Manager",
+"Route53",
+"Global Accelerator"
+],
+
+"AWS Compute":[
+"EC2",
+"Elastic IP",
+"Auto Scaling",
+"Lambda",
+"ECS",
+"EKS",
+"Fargate"
+],
+
+"AWS Storage":[
+"S3",
+"EBS",
+"EFS",
+"Glacier",
+"S3 Lifecycle",
+"S3 Replication",
+"AWS Backup"
+],
+
+"AWS Databases":[
+"RDS",
+"Aurora",
+"MySQL",
+"PostgreSQL",
+"DynamoDB",
+"Redshift",
+"ElastiCache"
+],
+
+"AWS Monitoring":[
+"CloudWatch",
+"CloudWatch Logs",
+"CloudWatch Alarms",
+"AWS Config",
+"CloudTrail",
+"Trusted Advisor"
+],
+
+"Messaging":[
+"SNS",
+"SQS",
+"SNS Topics",
+"SQS Queues",
+"SNS Subscribers"
+],
+
+"DevOps Foundations":[
+"What is DevOps",
+"DevOps Goals",
+"DevOps History",
+"DevOps Terminology",
+"DevOps and Agile",
+"CI CD"
+],
+
+"Git":[
+"Git Basics",
+"Init",
+"Add",
+"Commit",
+"Push",
+"Pull",
+"Clone",
+"Branching",
+"Merging",
+"Rebasing",
+"Conflict Resolution"
+],
+
+"Maven":[
+"Maven Introduction",
+"Maven Lifecycle",
+"Maven Repositories",
+"Maven Project Structure",
+"Maven Build"
+],
+
+"Jenkins":[
+"Jenkins Installation",
+"Jenkins Jobs",
+"Jenkins Pipelines",
+"Jenkins Node Setup",
+"Jenkins Git Integration",
+"Jenkins Docker Integration"
+],
+
+"Ansible":[
+"Ansible Introduction",
+"Ansible Inventory",
+"Adhoc Commands",
+"Playbooks",
+"Roles",
+"Ansible Vault"
+],
+
+"Docker":[
+"Containerization",
+"Docker Images",
+"Docker Containers",
+"Dockerfile",
+"Docker Compose",
+"Docker Volumes",
+"Docker Hub"
+],
+
+"Kubernetes":[
+"Kubernetes Architecture",
+"Pods",
+"ReplicaSet",
+"Deployment",
+"Services",
+"Scaling",
+"Volumes"
+],
+
+"Terraform":[
+"IaC Concepts",
+"Terraform Providers",
+"Resources",
+"Terraform Plan",
+"Terraform Apply",
+"Terraform Destroy",
+"Terraform Variables"
+],
+
+"Monitoring":[
+"Prometheus",
+"Node Exporter",
+"Grafana",
+"Prometheus Metrics",
+"Grafana Dashboards"
+]
+
+}
+
+
+let completed = JSON.parse(localStorage.getItem("completed")) || {}
+
+function render(){
+
+let container = document.getElementById("curriculum")
+
+container.innerHTML=""
+
+let total = 0
+let done = 0
+
+for(let module in curriculum){
+
+let div=document.createElement("div")
+
+div.className="module"
+
+let title=document.createElement("h3")
+
+title.innerText=module
+
+div.appendChild(title)
+
+curriculum[module].forEach(topic=>{
+
+total++
+
+let label=document.createElement("label")
+
+label.className="topic"
+
+let check=document.createElement("input")
+
+check.type="checkbox"
+
+check.checked=completed[topic]||false
+
+if(check.checked) done++
+
+check.onchange=()=>{
+
+completed[topic]=check.checked
+localStorage.setItem("completed",JSON.stringify(completed))
+render()
+
+}
+
+label.appendChild(check)
+
+label.appendChild(document.createTextNode(" "+topic))
+
+div.appendChild(label)
+
+div.appendChild(document.createElement("br"))
+
+})
+
+container.appendChild(div)
+
+}
+
+document.getElementById("total").innerText=total
+document.getElementById("completed").innerText=done
+document.getElementById("percent").innerText=Math.round(done/total*100)+"%"
+
+}
+
+
+render()
+
+new Chart(
+
+document.getElementById("radar"),
+
+{
+
+type:"radar",
+
+data:{
+
+labels:["AWS","Docker","Kubernetes","Terraform","CI/CD","Monitoring"],
+
+datasets:[{
+
+label:"Skill Level",
+
+data:[70,60,40,30,50,25]
+
+}]
+
+}
+
+})
+
+</script>
+
+</body>
+</html>
